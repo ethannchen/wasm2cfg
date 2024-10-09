@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Fibonacci Generator Flowchart</title>
+    <script src="//d3js.org/d3.v7.min.js"></script>
+    <script src="https://unpkg.com/@hpcc-js/wasm@2.20.0/dist/graphviz.umd.js"></script>
+    <script src="https://unpkg.com/d3-graphviz@5.6.0/build/d3-graphviz.js"></script>
+</head>
+<body>
+    <div id="graph" style="text-align: center;"></div>
+    <button id="export-btn">Export SVG</button>
+
+    <script>
+        const dot = `
+        digraph CFG {
+            node [shape=box, style=filled, fillcolor=lightgrey];
+            edge [color=black];
+            // Entry and Exit nodes
+            entry [label="Entry", shape=ellipse, fillcolor=lightgreen];
+            exit [label="Exit", shape=ellipse, fillcolor=lightgreen];
+            
+            // Variables and data nodes
+            x [label="x", shape=ellipse, fillcolor=lightyellow];
+            y [label="y", shape=ellipse, fillcolor=lightyellow];
+            z [label="z", shape=ellipse, fillcolor=lightyellow];
+            i [label="i", shape=ellipse, fillcolor=lightyellow];
+            a [label="a", shape=ellipse, fillcolor=lightyellow];
+            b [label="b", shape=ellipse, fillcolor=lightyellow];
+            
+            // Constant nodes (numbers)
+            const_5 [label="5", shape=ellipse, fillcolor=lightcyan];
+            const_10 [label="10", shape=ellipse, fillcolor=lightcyan];
+            const_1 [label="1", shape=ellipse, fillcolor=lightcyan];
+            const_3 [label="3", shape=ellipse, fillcolor=lightcyan];
+            const_20 [label="20", shape=ellipse, fillcolor=lightcyan];
+            const_2 [label="2", shape=ellipse, fillcolor=lightcyan];
+            
+            // Action nodes (simplified to represent only operations)
+            assign_x [label="="];
+            assign_y [label="="];
+            add_x_1 [label="+"];
+            sub_x_1 [label="-"];
+            if_cond [label=">"];
+            
+            assign_i [label="="];
+            for_cond [label="<"];
+            inc_i [label="++"];
+            add_i_y [label="+="];
+            
+            while_cond [label="<"];
+            add_2_y [label="+="];
+            
+            call_add_func [label="="];
+            func_call [label="add_numbers()"];
+            add_a_b [label="+"];
+            
+            print_result [label="Print"];
+            
+            // Control Flow Edges
+            entry -> assign_x;
+            assign_x -> assign_y;
+            assign_y -> if_cond;
+            
+            // If-else branches
+            if_cond -> add_x_1 [label="True"];
+            if_cond -> sub_x_1 [label="False"];
+            
+            add_x_1 -> assign_y;
+            sub_x_1 -> assign_y;
+            
+            assign_y -> assign_i;
+            
+            // For loop
+            assign_i -> for_cond;
+            for_cond -> add_i_y [label="i < 3"];
+            add_i_y -> inc_i;
+            inc_i -> for_cond;
+            for_cond -> while_cond [label="i >= 3"];
+            
+            // While loop
+            while_cond -> add_2_y [label="y < 20"];
+            add_2_y -> while_cond;
+            while_cond -> call_add_func [label="y >= 20"];
+            
+            // Function call and return
+            call_add_func -> func_call;
+            func_call -> add_a_b;
+            add_a_b -> call_add_func [label="return"];
+            call_add_func -> print_result;
+            
+            // Exit
+            print_result -> exit;
+            
+            // Data Dependency Edges (Dashed)
+            edge [style=dashed];
+            
+            // Assignments and data flow
+            x -> assign_x;
+            const_5 -> assign_x;
+            
+            assign_x -> x;
+            const_10 -> assign_y;
+            assign_y -> y;
+            
+            x -> if_cond;
+            
+            x -> add_x_1;
+            const_1 -> add_x_1;
+            
+            x -> sub_x_1;
+            const_1 -> sub_x_1;
+            
+            add_x_1 -> assign_y;
+            sub_x_1 -> assign_y;
+            
+            // For loop data
+            const_0 [label="0", shape=ellipse, fillcolor=lightcyan];
+            const_0 -> assign_i;
+            assign_i -> i;
+            
+            i -> for_cond;
+            const_3 -> for_cond;
+            
+            i -> add_i_y;
+            add_i_y -> y;
+            
+            // While loop data
+            y -> while_cond;
+            const_20 -> while_cond;
+            
+            y -> add_2_y;
+            const_2 -> add_2_y;
+            
+            add_2_y -> y;
+            
+            // Function call
+            x -> call_add_func;
+            y -> call_add_func;
+            call_add_func -> z;
+            
+            // Function internals
+            x -> func_call;
+            y -> func_call;
+            a -> add_a_b;
+            b -> add_a_b;
+            add_a_b -> z;
+        }`;
+
+        // Render the graph
+        const graphviz = d3.select("#graph").graphviz()
+            .renderDot(dot);
+
+        // Function to download the SVG
+        function exportSVG() {
+            // Get the SVG element
+            const svgElement = document.querySelector("#graph svg");
+
+            // Create a Blob from the SVG XML
+            const svgData = new XMLSerializer().serializeToString(svgElement);
+            const blob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+
+            // Create a link to download the file
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'graph.svg';
+            document.body.appendChild(link);
+
+            // Trigger the download
+            link.click();
+
+            // Clean up
+            document.body.removeChild(link);
+        }
+
+        // Add event listener to the export button
+        document.getElementById('export-btn').addEventListener('click', exportSVG);
+    </script>
+</body>
+</html>
