@@ -6,3 +6,5 @@
 - cd wasm2cfg-react
 - npm i 
 - npm start
+### 3) Example graph
+![demo_code_cfg_svg](https://github.com/user-attachments/assets/7bd5a934-850f-43dd-91c0-076a8fff8922)
